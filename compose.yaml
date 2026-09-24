@@ -169,7 +169,7 @@ services:
       - --event_storage_event_limit=default=0
       - --event_storage_age_limit=default=0
     volumes:
-      - /:/rootfs:ro,rslave
+      - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
       - /var/lib/docker:/var/lib/docker:ro
