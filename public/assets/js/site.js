@@ -12,10 +12,21 @@
         // Keep the default theme if browser storage is unavailable.
     }
 
+    const syncThemeButton = () => {
+        if (!themeButton) return;
+        const darkTheme = root.classList.contains('dark');
+        themeButton.setAttribute('aria-pressed', darkTheme ? 'true' : 'false');
+        themeButton.setAttribute('aria-label', darkTheme ? 'Đang dùng giao diện tối; chuyển sang sáng' : 'Đang dùng giao diện sáng; chuyển sang tối');
+        themeButton.title = darkTheme ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối';
+    };
+
+    syncThemeButton();
+
     if (themeButton) {
         themeButton.addEventListener('click', () => {
             const applyTheme = () => {
                 root.classList.toggle('dark');
+                syncThemeButton();
                 try {
                     localStorage.setItem('portfolio-theme', root.classList.contains('dark') ? 'dark' : 'light');
                 } catch (_) {
@@ -24,7 +35,21 @@
             };
 
             if (!reducedMotion && typeof document.startViewTransition === 'function') {
-                document.startViewTransition(applyTheme);
+                const bounds = themeButton.getBoundingClientRect();
+                const originX = bounds.left + bounds.width / 2;
+                const originY = bounds.top + bounds.height / 2;
+                const farthestX = Math.max(originX, window.innerWidth - originX);
+                const farthestY = Math.max(originY, window.innerHeight - originY);
+                const radius = Math.ceil(Math.hypot(farthestX, farthestY));
+                root.style.setProperty('--theme-origin-x', `${originX}px`);
+                root.style.setProperty('--theme-origin-y', `${originY}px`);
+                root.style.setProperty('--theme-reveal-radius', `${radius}px`);
+                const transition = document.startViewTransition(applyTheme);
+                transition.finished.then(() => {
+                    root.style.removeProperty('--theme-origin-x');
+                    root.style.removeProperty('--theme-origin-y');
+                    root.style.removeProperty('--theme-reveal-radius');
+                }, () => {});
             } else {
                 applyTheme();
             }

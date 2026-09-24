@@ -1,5 +1,4 @@
 <?php
-$initial = mb_strtoupper(mb_substr((string) $profile['display_name'], 0, 1, 'UTF-8'), 'UTF-8');
 $avatarPath = (string) ($profile['avatar_path'] ?? '');
 ?>
 <!doctype html>
@@ -26,7 +25,10 @@ $avatarPath = (string) ($profile['avatar_path'] ?? '');
                 <a href="#contact">Liên hệ</a>
             </div>
             <div class="nav-actions">
-                <button class="icon-button" id="theme-toggle" type="button" aria-label="Chuyển giao diện sáng tối"><span aria-hidden="true">☼</span></button>
+                <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Chuyển giao diện sáng tối" aria-pressed="true">
+                    <svg class="theme-glyph theme-glyph-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+                    <svg class="theme-glyph theme-glyph-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 15.3A8.7 8.7 0 0 1 8.7 3.6 8.8 8.8 0 1 0 20.4 15.3Z"/></svg>
+                </button>
                 <a class="button button-small" href="/admin">Quản trị</a>
             </div>
         </nav>
@@ -60,13 +62,8 @@ $avatarPath = (string) ($profile['avatar_path'] ?? '');
                     </svg>
                     <span class="lanyard-clip"></span>
                 </div>
-                <div class="profile-card" data-tilt>
-                    <div class="profile-card-top"><span class="card-spark" aria-hidden="true">✳</span></div>
-                    <div class="avatar"><?php if ($avatarPath !== ''): ?><img src="<?= e($avatarPath) ?>" alt="Ảnh đại diện của <?= e($profile['display_name']) ?>"><?php else: ?><span aria-hidden="true"><?= e($initial) ?></span><?php endif; ?></div>
-                    <p class="card-name"><?= e($profile['display_name']) ?></p>
-                    <p class="card-role"><?= e($profile['role_title']) ?></p>
-                    <div class="card-divider"></div>
-                    <div class="card-detail card-detail-id"><span>MÃ SINH VIÊN</span><strong><?= e($profile['student_code']) ?></strong></div>
+                <div class="profile-card" data-tilt aria-label="Ảnh hồ sơ">
+                    <?php if ($avatarPath !== ''): ?><img class="profile-card-image" src="<?= e($avatarPath) ?>" alt="Ảnh hồ sơ"><?php else: ?><div class="profile-card-placeholder" aria-hidden="true"></div><?php endif; ?>
                 </div>
             </div>
         </section>

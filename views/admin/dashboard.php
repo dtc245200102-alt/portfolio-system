@@ -7,7 +7,7 @@
         <div class="admin-title-row"><div><p class="eyebrow">Bảng điều khiển</p><h1>Quản lý nội dung</h1><p class="muted">Thay đổi tại đây sẽ được lưu vào MySQL và hiển thị trên portfolio.</p></div></div>
         <?php if ($flash): ?><div class="flash flash-<?= e($flash['type']) ?>" role="status"><?= e($flash['message']) ?></div><?php endif; ?>
 
-        <section class="admin-panel"><div class="panel-heading"><div><p class="eyebrow">01 / Hồ sơ</p><h2>Thông tin cá nhân</h2></div></div>
+        <section class="admin-panel"><div class="panel-heading"><div><p class="eyebrow">01 / Hồ sơ</p><h2>Thông tin cá nhân</h2><p class="muted">Tại đây bạn có thể thay đổi toàn bộ nội dung hồ sơ, thông tin liên hệ và ảnh hiển thị trên thẻ.</p></div></div>
             <div class="avatar-manager">
                 <?php if (!empty($profile['avatar_path'])): ?><img class="avatar-preview" src="<?= e($profile['avatar_path']) ?>" alt="Ảnh đại diện hiện tại"><?php else: ?><div class="avatar-preview avatar-placeholder" aria-hidden="true"><?= e(mb_strtoupper(mb_substr((string) $profile['display_name'], 0, 1, 'UTF-8'), 'UTF-8')) ?></div><?php endif; ?>
                 <form action="/admin/avatar" method="post" enctype="multipart/form-data" class="admin-form avatar-form">
