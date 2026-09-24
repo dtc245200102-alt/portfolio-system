@@ -1,0 +1,346 @@
+name: portfolio-system
+
+services:
+  log-init:
+    image: busybox:1.36
+    user: "0:0"
+    command: ["sh", "-c", "mkdir -p /logs/app /logs/nginx /logs/mysql && chown -R 82:82 /logs/app && chown -R 101:101 /logs/nginx && chown -R 999:999 /logs/mysql"]
+    volumes:
+      - portfolio_logs:/logs
+    network_mode: none
+    restart: "no"
+
+  cert-init:
+    image: alpine:3.22
+    user: "0:0"
+    command: ["sh", "-c", "apk add --no-cache openssl >/dev/null && if [ ! -s /certs/server.crt ] || [ ! -s /certs/server.key ]; then openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 365 -keyout /certs/server.key -out /certs/server.crt -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'; fi && chown 101:101 /certs/server.key /certs/server.crt && chmod 640 /certs/server.key && chmod 644 /certs/server.crt"]
+    volumes:
+      - tls_certs:/certs
+    restart: "no"
+
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: portfolio
+      MYSQL_USER: portfolio_app
+      MYSQL_PASSWORD_FILE: /run/secrets/db_app_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    secrets:
+      - db_app_password
+      - db_root_password
+      - mysql_exporter_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - portfolio_logs:/var/log/portfolio
+      - ./infra/mysql/logging.cnf:/etc/mysql/conf.d/portfolio-logging.cnf:ro
+      - ./infra/mysql/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - database
+      - monitoring
+    tmpfs:
+      - /tmp
+      - /run/mysqld
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot --password=\"$$(cat /run/secrets/db_root_password)\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 35s
+    depends_on:
+      log-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: infra/php/Dockerfile
+    environment:
+      DB_HOST: db
+      DB_NAME: portfolio
+      DB_USER: portfolio_app
+      DB_PASSWORD_FILE: /run/secrets/db_app_password
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD_FILE: /run/secrets/admin_password
+      TZ: Asia/Ho_Chi_Minh
+    secrets:
+      - db_app_password
+      - admin_password
+    volumes:
+      - portfolio_logs:/var/log/portfolio
+    networks:
+      - application
+      - database
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "php", "/var/www/html/app/bin/healthcheck.php"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    depends_on:
+      db:
+        condition: service_healthy
+      log-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/nginx/Dockerfile
+    ports:
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8443:8443"
+    volumes:
+      - tls_certs:/etc/nginx/certs:ro
+      - portfolio_logs:/var/log/portfolio
+    networks:
+      - application
+      - monitoring
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+      - /var/cache/nginx:size=16m,uid=101,gid=101,mode=0750
+      - /var/run:size=1m,uid=101,gid=101,mode=0750
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-check-certificate -q -O /dev/null https://127.0.0.1:8443/healthz"]
+      interval: 30s
+      timeout: 8s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      app:
+        condition: service_healthy
+      cert-init:
+        condition: service_completed_successfully
+      log-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    profiles: ["tools"]
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: "0"
+      UPLOAD_LIMIT: 16M
+    ports:
+      - "127.0.0.1:8081:80"
+    networks:
+      - database
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - NET_RAW
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    command:
+      - --docker_only=true
+      - --store_container_labels=false
+      - --housekeeping_interval=30s
+      - --event_storage_event_limit=default=0
+      - --event_storage_age_limit=default=0
+    volumes:
+      - /:/rootfs:ro,rslave
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitoring
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.4.2
+    command: ["--nginx.scrape-uri=http://web:8081/nginx_status"]
+    networks:
+      - monitoring
+    depends_on:
+      web:
+        condition: service_healthy
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+  mysql-exporter:
+    image: prom/mysqld-exporter:v0.17.2
+    command: ["--config.my-cnf=/run/secrets/mysql_exporter_cnf"]
+    secrets:
+      - mysql_exporter_cnf
+    networks:
+      - database
+      - monitoring
+    depends_on:
+      db:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=8m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./infra/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - monitoring
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      - cadvisor
+      - nginx-exporter
+      - mysql-exporter
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.6.15
+    command: ["-config.file=/etc/loki/config.yml"]
+    volumes:
+      - ./infra/observability/loki.yml:/etc/loki/config.yml:ro
+      - loki_data:/loki
+    networks:
+      - monitoring
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.5.0
+    command: ["-config.file=/etc/promtail/config.yml"]
+    volumes:
+      - ./infra/observability/promtail.yml:/etc/promtail/config.yml:ro
+      - portfolio_logs:/var/log/portfolio:ro
+    networks:
+      - monitoring
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      - loki
+      - log-init
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.0.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    secrets:
+      - grafana_admin_password
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - monitoring
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+      - /var/log/grafana:size=8m,uid=472,gid=0,mode=0750
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      - prometheus
+      - loki
+    restart: unless-stopped
+
+networks:
+  application:
+    internal: true
+  database:
+    internal: true
+  monitoring:
+    internal: true
+
+volumes:
+  mysql_data:
+  portfolio_logs:
+  tls_certs:
+  prometheus_data:
+  loki_data:
+  grafana_data:
+
+secrets:
+  db_root_password:
+    file: ./secrets/db_root_password.txt
+  db_app_password:
+    file: ./secrets/db_app_password.txt
+  mysql_exporter_password:
+    file: ./secrets/mysql_exporter_password.txt
+  mysql_exporter_cnf:
+    file: ./secrets/mysql_exporter.cnf
+  admin_password:
+    file: ./secrets/admin_password.txt
+  grafana_admin_password:
+    file: ./secrets/grafana_admin_password.txt
