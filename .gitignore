@@ -1,0 +1,6 @@
+/secrets/*
+!/secrets/.gitkeep
+/work/
+/infra/observability/data/
+.DS_Store
+Thumbs.db

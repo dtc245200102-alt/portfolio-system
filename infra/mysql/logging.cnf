@@ -1,0 +1,3 @@
+[mysqld]
+log_error=/var/log/portfolio/mysql/error.log
+general_log=OFF
