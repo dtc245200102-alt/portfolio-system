@@ -55,10 +55,12 @@ $avatarPath = (string) ($profile['avatar_path'] ?? '');
             <div class="hero-art" aria-label="Thẻ giới thiệu <?= e($profile['display_name']) ?>">
                 <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
                 <div class="lanyard" aria-hidden="true">
-                    <svg class="lanyard-loop" viewBox="0 0 260 230" focusable="false">
-                        <defs><linearGradient id="lanyard-color" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent-2)"/></linearGradient></defs>
-                        <path class="lanyard-shadow" d="M22 -16 C22 82 59 137 130 153 C201 137 238 82 238 -16"/>
-                        <path class="lanyard-ribbon" d="M22 -16 C22 82 59 137 130 153 C201 137 238 82 238 -16"/>
+                    <svg class="lanyard-loop" viewBox="0 0 120 190" focusable="false">
+                        <defs><linearGradient id="lanyard-webbing" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#080d17"/><stop offset=".48" stop-color="#283244"/><stop offset="1" stop-color="#0a0f19"/></linearGradient></defs>
+                        <path class="lanyard-shadow" d="M60 -18 C58 35 63 82 60 150"/>
+                        <path class="lanyard-ribbon" d="M60 -18 C58 35 63 82 60 150"/>
+                        <path class="lanyard-stitch" d="M54 -12 C53 38 58 83 55 143 M66 -12 C65 38 70 83 67 143"/>
+                        <path class="lanyard-center-seam" d="M60 -12 C58 38 63 83 60 143"/>
                     </svg>
                     <span class="lanyard-clip"></span>
                 </div>
