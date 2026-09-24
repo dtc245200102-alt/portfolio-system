@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 define('APP_ROOT', dirname(__DIR__));
 
+header('Content-Type: text/html; charset=UTF-8');
+
 session_name('portfolio_session');
 session_set_cookie_params([
     'httponly' => true,

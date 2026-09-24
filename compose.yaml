@@ -79,6 +79,7 @@ services:
       - admin_password
     volumes:
       - portfolio_logs:/var/log/portfolio
+      - portfolio_uploads:/var/www/html/public/uploads
     networks:
       - application
       - database
@@ -112,9 +113,11 @@ services:
     volumes:
       - tls_certs:/etc/nginx/certs:ro
       - portfolio_logs:/var/log/portfolio
+      - portfolio_uploads:/var/www/html/public/uploads:ro
     networks:
       - application
       - monitoring
+      - host_access
     read_only: true
     tmpfs:
       - /tmp:size=16m,mode=1777
@@ -322,10 +325,13 @@ networks:
     internal: true
   monitoring:
     internal: true
+  host_access:
+    driver: bridge
 
 volumes:
   mysql_data:
   portfolio_logs:
+  portfolio_uploads:
   tls_certs:
   prometheus_data:
   loki_data:

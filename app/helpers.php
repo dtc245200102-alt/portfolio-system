@@ -103,10 +103,13 @@ function profile(): array
     return $result ?: [
         'display_name' => 'Nguyễn Văn Khánh',
         'student_code' => 'DTC245200102',
+        'school_name' => '',
+        'education_details' => '',
         'role_title' => 'Sinh viên',
         'tagline' => 'Portfolio cá nhân và các dự án thực hành của tôi.',
         'about_text' => 'Tôi là Nguyễn Văn Khánh, sinh viên mã số DTC245200102.',
         'email' => '',
         'github_url' => '',
+        'avatar_path' => '',
     ];
 }

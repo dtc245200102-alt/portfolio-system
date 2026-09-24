@@ -9,11 +9,10 @@
             <?php if ($flash): ?><div class="flash flash-<?= e($flash['type']) ?>" role="status"><?= e($flash['message']) ?></div><?php endif; ?>
             <form action="/admin/login" method="post" class="admin-form">
                 <?= csrf_field() ?>
-                <label for="username">Tên đăng nhập</label><input id="username" name="username" value="admin" autocomplete="username" required>
+                <label for="username">Tên đăng nhập</label><input id="username" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" required>
                 <label for="password">Mật khẩu</label><input id="password" type="password" name="password" autocomplete="current-password" required>
                 <button class="button" type="submit">Đăng nhập <span aria-hidden="true">→</span></button>
             </form>
-            <p class="login-hint">Thông tin ban đầu: tên đăng nhập <code>admin</code>; mật khẩu nằm trong file cục bộ <code>secrets/admin_password.txt</code>.</p>
         </section>
     </main>
 </body>

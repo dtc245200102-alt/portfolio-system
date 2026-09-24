@@ -83,6 +83,8 @@ try {
         if ($path === '/admin/profile') {
             $name = request_text('display_name', 120);
             $studentCode = request_text('student_code', 40);
+            $schoolName = request_text('school_name', 180);
+            $educationDetails = request_text('education_details', 5000);
             $role = request_text('role_title', 180);
             $tagline = request_text('tagline', 240);
             $about = request_text('about_text', 5000);
@@ -102,9 +104,94 @@ try {
                 redirect('/admin');
             }
 
-            $statement = db()->prepare('UPDATE profile SET display_name = :name, student_code = :student_code, role_title = :role, tagline = :tagline, about_text = :about, email = :email, github_url = :github WHERE id = 1');
-            $statement->execute(['name' => $name, 'student_code' => $studentCode, 'role' => $role, 'tagline' => $tagline, 'about' => $about, 'email' => $email, 'github' => $githubUrl ?? '']);
+            $statement = db()->prepare('UPDATE profile SET display_name = :name, student_code = :student_code, school_name = :school_name, education_details = :education_details, role_title = :role, tagline = :tagline, about_text = :about, email = :email, github_url = :github WHERE id = 1');
+            $statement->execute(['name' => $name, 'student_code' => $studentCode, 'school_name' => $schoolName, 'education_details' => $educationDetails, 'role' => $role, 'tagline' => $tagline, 'about' => $about, 'email' => $email, 'github' => $githubUrl ?? '']);
             set_flash('success', 'Đã cập nhật hồ sơ.');
+            redirect('/admin');
+        }
+
+        if ($path === '/admin/avatar') {
+            $currentAvatar = (string) (profile()['avatar_path'] ?? '');
+            $removeAvatar = (string) ($_POST['remove_avatar'] ?? '') === '1';
+            $avatarPath = '';
+
+            if (!$removeAvatar) {
+                $upload = $_FILES['avatar'] ?? null;
+                if (!is_array($upload) || ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                    set_flash('error', 'Chọn một ảnh JPG, PNG hoặc WebP nhỏ hơn 2 MB rồi thử lại.');
+                    redirect('/admin');
+                }
+                if ((int) ($upload['size'] ?? 0) < 1 || (int) $upload['size'] > 2 * 1024 * 1024) {
+                    set_flash('error', 'Ảnh phải có dung lượng nhỏ hơn 2 MB.');
+                    redirect('/admin');
+                }
+
+                $temporaryPath = (string) ($upload['tmp_name'] ?? '');
+                $imageInfo = $temporaryPath !== '' ? @getimagesize($temporaryPath) : false;
+                $mime = $temporaryPath !== '' ? (new finfo(FILEINFO_MIME_TYPE))->file($temporaryPath) : false;
+                $extensions = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+                if ($imageInfo === false || !isset($extensions[$mime]) || $imageInfo[0] > 6000 || $imageInfo[1] > 6000 || ($imageInfo[0] * $imageInfo[1]) > 20000000) {
+                    set_flash('error', 'Tệp đã chọn không phải ảnh JPG, PNG hoặc WebP hợp lệ.');
+                    redirect('/admin');
+                }
+
+                $uploadDirectory = APP_ROOT . '/public/uploads';
+                if (!is_dir($uploadDirectory) || !is_writable($uploadDirectory)) {
+                    set_flash('error', 'Thư mục ảnh chưa sẵn sàng. Hãy khởi động lại dịch vụ app.');
+                    redirect('/admin');
+                }
+
+                $filename = bin2hex(random_bytes(16)) . '.' . $extensions[$mime];
+                if (!move_uploaded_file($temporaryPath, $uploadDirectory . '/' . $filename)) {
+                    set_flash('error', 'Không thể lưu ảnh. Vui lòng thử lại.');
+                    redirect('/admin');
+                }
+                chmod($uploadDirectory . '/' . $filename, 0644);
+                $avatarPath = '/uploads/' . $filename;
+            }
+
+            $statement = db()->prepare('UPDATE profile SET avatar_path = :avatar_path WHERE id = 1');
+            $statement->execute(['avatar_path' => $avatarPath]);
+            if ($currentAvatar !== $avatarPath && preg_match('~^/uploads/[a-f0-9]{32}\.(?:jpg|png|webp)$~D', $currentAvatar) === 1) {
+                @unlink(APP_ROOT . '/public' . $currentAvatar);
+            }
+            set_flash('success', $removeAvatar ? 'Đã xóa ảnh đại diện.' : 'Đã cập nhật ảnh đại diện.');
+            redirect('/admin');
+        }
+
+        if ($path === '/admin/facts') {
+            $content = request_text('content', 180);
+            if ($content === '') {
+                set_flash('error', 'Vui lòng nhập nội dung cho mục giới thiệu.');
+                redirect('/admin');
+            }
+            $nextOrder = (int) db()->query('SELECT COALESCE(MAX(sort_order), 0) + 1 FROM about_facts')->fetchColumn();
+            $statement = db()->prepare('INSERT INTO about_facts (content, sort_order) VALUES (:content, :sort_order)');
+            $statement->execute(['content' => $content, 'sort_order' => $nextOrder]);
+            set_flash('success', 'Đã thêm mục giới thiệu.');
+            redirect('/admin');
+        }
+
+        if ($path === '/admin/facts/update') {
+            $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
+            $content = request_text('content', 180);
+            if ($id === false || $id < 1 || $content === '') {
+                set_flash('error', 'Vui lòng nhập nội dung hợp lệ cho mục giới thiệu.');
+                redirect('/admin');
+            }
+            $statement = db()->prepare('UPDATE about_facts SET content = :content WHERE id = :id');
+            $statement->execute(['content' => $content, 'id' => $id]);
+            set_flash('success', 'Đã cập nhật mục giới thiệu.');
+            redirect('/admin');
+        }
+
+        if ($path === '/admin/facts/delete') {
+            $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
+            if ($id !== false && $id > 0) {
+                $statement = db()->prepare('DELETE FROM about_facts WHERE id = :id');
+                $statement->execute(['id' => $id]);
+            }
+            set_flash('success', 'Đã xóa mục giới thiệu.');
             redirect('/admin');
         }
 
@@ -178,6 +265,7 @@ try {
         }
 
         $profile = profile();
+        $facts = db()->query('SELECT id, content FROM about_facts ORDER BY sort_order, id')->fetchAll();
         $skills = db()->query('SELECT id, name, level FROM skills ORDER BY sort_order, id')->fetchAll();
         $projects = db()->query('SELECT id, title, description, tech_stack, project_url FROM projects ORDER BY sort_order, id')->fetchAll();
         $messages = db()->query('SELECT id, name, email, message, created_at FROM contact_messages ORDER BY created_at DESC, id DESC')->fetchAll();
@@ -188,6 +276,7 @@ try {
 
     if ($path === '/' || $path === '') {
         $profile = profile();
+        $facts = db()->query('SELECT id, content FROM about_facts ORDER BY sort_order, id')->fetchAll();
         $skills = db()->query('SELECT id, name, level FROM skills ORDER BY sort_order, id')->fetchAll();
         $projects = db()->query('SELECT id, title, description, tech_stack, project_url FROM projects ORDER BY sort_order, id')->fetchAll();
         $flash = take_flash();

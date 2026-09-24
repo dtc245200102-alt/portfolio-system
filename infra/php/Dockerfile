@@ -10,8 +10,11 @@ COPY infra/php/www.conf /usr/local/etc/php-fpm.d/zz-portfolio.conf
 COPY --chown=www-data:www-data app /var/www/html/app
 COPY --chown=www-data:www-data public /var/www/html/public
 COPY --chown=www-data:www-data views /var/www/html/views
+RUN mkdir -p /var/www/html/public/uploads \
+    && chown www-data:www-data /var/www/html/public/uploads \
+    && chmod 0755 /var/www/html/public/uploads
 
 WORKDIR /var/www/html
 USER www-data
 EXPOSE 9000
-CMD ["php-fpm", "-F"]
+CMD ["sh", "-c", "php /var/www/html/app/bin/migrate.php && exec php-fpm -F"]

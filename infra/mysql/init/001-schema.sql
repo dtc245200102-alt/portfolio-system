@@ -5,12 +5,22 @@ CREATE TABLE IF NOT EXISTS profile (
     id TINYINT UNSIGNED NOT NULL PRIMARY KEY,
     display_name VARCHAR(120) NOT NULL,
     student_code VARCHAR(40) NOT NULL DEFAULT '',
+    school_name VARCHAR(180) NOT NULL DEFAULT '',
+    education_details TEXT NOT NULL DEFAULT (''),
     role_title VARCHAR(180) NOT NULL,
     tagline VARCHAR(240) NOT NULL,
     about_text TEXT NOT NULL,
     email VARCHAR(190) NOT NULL DEFAULT '',
     github_url VARCHAR(500) NOT NULL DEFAULT '',
+    avatar_path VARCHAR(255) NOT NULL DEFAULT '',
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS about_facts (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    content VARCHAR(180) NOT NULL,
+    sort_order INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS skills (
@@ -45,6 +55,13 @@ VALUES (1, 'Nguyễn Văn Khánh', 'DTC245200102', 'Sinh viên',
         'Portfolio cá nhân và các dự án thực hành của tôi.',
         'Tôi là Nguyễn Văn Khánh, sinh viên mã số DTC245200102. Đây là portfolio cá nhân để giới thiệu thông tin, kỹ năng và các dự án thực hành môn Triển khai và Quản trị Hệ thống Phần mềm.',
         '', '');
+
+INSERT INTO about_facts (content, sort_order)
+SELECT 'Luôn tò mò', 1 WHERE NOT EXISTS (SELECT 1 FROM about_facts);
+INSERT INTO about_facts (content, sort_order)
+SELECT 'Học qua thực hành', 2 WHERE (SELECT COUNT(*) FROM about_facts) = 1;
+INSERT INTO about_facts (content, sort_order)
+SELECT 'Chia sẻ điều hữu ích', 3 WHERE (SELECT COUNT(*) FROM about_facts) = 2;
 
 INSERT INTO skills (name, level, sort_order)
 SELECT 'PHP', 65, 1 WHERE NOT EXISTS (SELECT 1 FROM skills);

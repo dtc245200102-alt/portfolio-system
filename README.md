@@ -1,6 +1,6 @@
 # Hệ thống Portfolio cá nhân
 
-Website giới thiệu cá nhân có khu vực quản trị nội dung, MySQL/phpMyAdmin, Nginx HTTPS, Prometheus/Grafana và Loki/Promtail. Các dịch vụ chạy bằng Docker Compose; mật khẩu và chứng thư tự ký được tạo riêng trên máy chạy hệ thống.
+Website giới thiệu cá nhân có khu vực quản trị nội dung, tải ảnh đại diện, mục học vấn có thể chỉnh sửa, MySQL/phpMyAdmin, Nginx HTTPS, Prometheus/Grafana và Loki/Promtail. Các dịch vụ chạy bằng Docker Compose; mật khẩu và chứng thư tự ký được tạo riêng trên máy chạy hệ thống.
 
 Portfolio đã được điền sẵn tên Nguyễn Văn Khánh và mã sinh viên DTC245200102. Bạn có thể sửa các thông tin này trong trang **Quản trị → Thông tin cá nhân**.
 
@@ -45,7 +45,7 @@ Portfolio đã được điền sẵn tên Nguyễn Văn Khánh và mã sinh vi�
 
    Chứng thư HTTPS được tự tạo để thực hành nên trình duyệt sẽ báo chưa tin cậy. Xác nhận tiếp tục tới `localhost`; không dùng chứng thư này cho website công khai.
 
-6. Đăng nhập trang quản trị với tên `admin` và mật khẩu vừa được in ra. Sửa hồ sơ, thêm hoặc xóa kỹ năng/dự án, rồi gửi thử một lời nhắn ở website để xem tin nhắn trong mục **Hộp thư**.
+6. Đăng nhập trang quản trị với tên `admin` và mật khẩu vừa được in ra. Tại đây có thể thay ảnh đại diện, sửa hồ sơ và thông tin học vấn, thêm hoặc xóa kỹ năng/dự án, rồi gửi thử một lời nhắn ở website để xem tin nhắn trong mục **Hộp thư**. Ảnh đại diện được giới hạn ở JPG, PNG hoặc WebP, tối đa 2 MB.
 
 7. Đăng nhập Grafana với tên `admin` và mật khẩu Grafana đã được in ra. Dashboard **Portfolio System Overview** được nạp tự động. Trong phpMyAdmin, chọn máy chủ `db`, database `portfolio`, rồi đăng nhập bằng `portfolio_app` và mật khẩu trong `secrets/db_app_password.txt`.
 
@@ -91,7 +91,7 @@ Muốn chạy các dịch vụ mặc định mà không có phpMyAdmin, bỏ `--
 ## 4. Bố cục mã nguồn
 
 ```text
-app/                         Kết nối MySQL, session, CSRF và xử lý route
+app/                         Kết nối MySQL, migration, session, CSRF và xử lý route
 public/                      Front controller và tài nguyên CSS/JavaScript
 views/                       Giao diện website và trang quản trị
 infra/php/                   Dockerfile, PHP và PHP-FPM config
@@ -102,7 +102,7 @@ scripts/                     Script tạo mật khẩu cục bộ
 compose.yaml                 Khai báo dịch vụ, networks, volumes và secrets
 ```
 
-PHP dùng PDO prepared statements, escape dữ liệu đầu ra, session cookie HttpOnly/SameSite, đổi session ID sau đăng nhập, token CSRF, giới hạn thử đăng nhập và kiểm tra đường dẫn URL. Tài khoản `portfolio_app` chỉ có quyền trên database `portfolio`; exporter MySQL có user riêng với quyền đọc số liệu. Mạng database và ứng dụng được đánh dấu `internal`; chỉ website, Grafana, Prometheus và phpMyAdmin có cổng được công bố trên loopback.
+PHP dùng PDO prepared statements, escape dữ liệu đầu ra, session cookie HttpOnly/SameSite, đổi session ID sau đăng nhập, token CSRF, giới hạn thử đăng nhập và kiểm tra đường dẫn URL. Migration thêm các trường ảnh đại diện/học vấn, tạo bảng các mục nổi bật của phần Giới thiệu và sửa các chuỗi tiếng Việt bị lỗi mã hóa trong dữ liệu đã khởi tạo; migration chạy tự động khi container ứng dụng khởi động. Trong trang quản trị, các mục nổi bật có thể được thêm, sửa và xóa. Ảnh tải lên được lưu trong Docker volume dùng chung giữa PHP và Nginx. Tài khoản `portfolio_app` chỉ có quyền trên database `portfolio`; exporter MySQL có user riêng với quyền đọc số liệu. Mạng database và ứng dụng được đánh dấu `internal`; Nginx có network bridge riêng để phục vụ cổng HTTPS chỉ trên loopback, còn Grafana, Prometheus và phpMyAdmin cũng chỉ công bố cổng trên loopback.
 
 `cAdvisor` cần đọc Docker socket để liệt kê và lấy số liệu container. Socket được gắn `:ro`, dịch vụ không công bố cổng ra máy host và không có capability bổ sung; Docker socket vẫn là giao diện có quyền cao, nên chỉ bật stack này trên máy phát triển đáng tin cậy. Nginx, PHP, MySQL và các dịch vụ quan sát còn lại dùng `no-new-privileges`, filesystem read-only khi phù hợp và capability đã loại bỏ.
 
