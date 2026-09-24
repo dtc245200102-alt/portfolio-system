@@ -11,6 +11,7 @@
             <form action="/admin/profile" method="post" class="admin-form form-grid">
                 <?= csrf_field() ?>
                 <div><label for="display_name">Họ và tên</label><input id="display_name" name="display_name" maxlength="120" value="<?= e($profile['display_name']) ?>" required></div>
+                <div><label for="student_code">Mã sinh viên</label><input id="student_code" name="student_code" maxlength="40" value="<?= e($profile['student_code']) ?>" required></div>
                 <div><label for="role_title">Vai trò / ngành học</label><input id="role_title" name="role_title" maxlength="180" value="<?= e($profile['role_title']) ?>" required></div>
                 <div class="field-wide"><label for="tagline">Câu giới thiệu ngắn</label><input id="tagline" name="tagline" maxlength="240" value="<?= e($profile['tagline']) ?>" required></div>
                 <div class="field-wide"><label for="about_text">Giới thiệu bản thân</label><textarea id="about_text" name="about_text" rows="5" maxlength="5000" required><?= e($profile['about_text']) ?></textarea></div>

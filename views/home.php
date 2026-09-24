@@ -56,7 +56,7 @@ $initial = mb_strtoupper(mb_substr((string) $profile['display_name'], 0, 1, 'UTF
                     <p class="card-name"><?= e($profile['display_name']) ?></p>
                     <p class="card-role"><?= e($profile['role_title']) ?></p>
                     <div class="card-divider"></div>
-                    <div class="card-detail"><span>ĐỊNH HƯỚNG</span><strong>Web · Hệ thống · DevOps</strong></div>
+                    <div class="card-detail"><span>MÃ SINH VIÊN</span><strong><?= e($profile['student_code']) ?></strong></div>
                     <div class="card-detail"><span>TRẠNG THÁI</span><strong><span class="status-dot"></span> Đang phát triển</strong></div>
                 </div>
                 <span class="floating-tag tag-code">&lt;build /&gt;</span>

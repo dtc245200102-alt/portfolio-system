@@ -1,0 +1,25 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {"datasource":{"type":"prometheus","uid":"prometheus"},"fieldConfig":{"defaults":{"color":{"mode":"palette-classic"},"unit":"percentunit"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":0,"y":0},"id":1,"options":{"legend":{"displayMode":"list","placement":"bottom"},"tooltip":{"mode":"multi","sort":"desc"}},"targets":[{"expr":"sum by (name) (rate(container_cpu_usage_seconds_total[5m]))","legendFormat":"{{name}}","refId":"A"}],"title":"Container CPU usage","type":"timeseries"},
+    {"datasource":{"type":"prometheus","uid":"prometheus"},"fieldConfig":{"defaults":{"color":{"mode":"palette-classic"},"unit":"bytes"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":12,"y":0},"id":2,"options":{"legend":{"displayMode":"list","placement":"bottom"},"tooltip":{"mode":"multi","sort":"desc"}},"targets":[{"expr":"sum by (name) (container_memory_working_set_bytes)","legendFormat":"{{name}}","refId":"A"}],"title":"Container memory","type":"timeseries"},
+    {"datasource":{"type":"prometheus","uid":"prometheus"},"fieldConfig":{"defaults":{"color":{"mode":"palette-classic"},"unit":"reqps"},"overrides":[]},"gridPos":{"h":8,"w":12,"x":0,"y":8},"id":3,"options":{"legend":{"displayMode":"list","placement":"bottom"},"tooltip":{"mode":"multi","sort":"desc"}},"targets":[{"expr":"rate(nginx_http_requests_total[5m])","legendFormat":"requests/sec","refId":"A"}],"title":"Nginx requests per second","type":"timeseries"},
+    {"datasource":{"type":"prometheus","uid":"prometheus"},"fieldConfig":{"defaults":{"color":{"mode":"thresholds"},"thresholds":{"mode":"absolute","steps":[{"color":"green","value":null},{"color":"red","value":1}]},"unit":"short"},"overrides":[]},"gridPos":{"h":8,"w":6,"x":12,"y":8},"id":4,"options":{"colorMode":"value","graphMode":"area","justifyMode":"center","orientation":"auto","reduceOptions":{"calcs":["lastNotNull"],"fields":"","values":false},"textMode":"auto"},"targets":[{"expr":"mysql_global_status_threads_connected","refId":"A"}],"title":"MySQL active connections","type":"stat"},
+    {"datasource":{"type":"loki","uid":"loki"},"gridPos":{"h":8,"w":6,"x":18,"y":8},"id":5,"options":{"dedupStrategy":"none","enableLogDetails":true,"prettifyLogMessage":false,"showCommonLabels":false,"showLabels":false,"showTime":true,"sortOrder":"Descending","wrapLogMessage":true},"targets":[{"expr":"{service=\"nginx\"}","refId":"A"}],"title":"Recent Nginx logs","type":"logs"}
+  ],
+  "refresh": "15s",
+  "schemaVersion": 41,
+  "tags": ["portfolio", "docker", "monitoring"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Portfolio System Overview",
+  "uid": "portfolio-overview",
+  "version": 1
+}

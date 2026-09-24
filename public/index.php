@@ -82,13 +82,14 @@ try {
 
         if ($path === '/admin/profile') {
             $name = request_text('display_name', 120);
+            $studentCode = request_text('student_code', 40);
             $role = request_text('role_title', 180);
             $tagline = request_text('tagline', 240);
             $about = request_text('about_text', 5000);
             $email = request_text('email', 190);
             $github = trim((string) ($_POST['github_url'] ?? ''));
-            if ($name === '' || $role === '' || $tagline === '' || $about === '') {
-                set_flash('error', 'Tên, vai trò, câu giới thiệu và phần giới thiệu không được để trống.');
+            if ($name === '' || $studentCode === '' || $role === '' || $tagline === '' || $about === '') {
+                set_flash('error', 'Họ tên, mã sinh viên, vai trò, câu giới thiệu và phần giới thiệu không được để trống.');
                 redirect('/admin');
             }
             if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -101,8 +102,8 @@ try {
                 redirect('/admin');
             }
 
-            $statement = db()->prepare('UPDATE profile SET display_name = :name, role_title = :role, tagline = :tagline, about_text = :about, email = :email, github_url = :github WHERE id = 1');
-            $statement->execute(['name' => $name, 'role' => $role, 'tagline' => $tagline, 'about' => $about, 'email' => $email, 'github' => $githubUrl ?? '']);
+            $statement = db()->prepare('UPDATE profile SET display_name = :name, student_code = :student_code, role_title = :role, tagline = :tagline, about_text = :about, email = :email, github_url = :github WHERE id = 1');
+            $statement->execute(['name' => $name, 'student_code' => $studentCode, 'role' => $role, 'tagline' => $tagline, 'about' => $about, 'email' => $email, 'github' => $githubUrl ?? '']);
             set_flash('success', 'Đã cập nhật hồ sơ.');
             redirect('/admin');
         }
@@ -114,8 +115,9 @@ try {
                 set_flash('error', 'Nhập tên kỹ năng và mức độ từ 0 đến 100.');
                 redirect('/admin');
             }
-            $statement = db()->prepare('INSERT INTO skills (name, level, sort_order) VALUES (:name, :level, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM (SELECT sort_order FROM skills) AS ordered_skills))');
-            $statement->execute(['name' => $name, 'level' => $level]);
+            $nextOrder = (int) db()->query('SELECT COALESCE(MAX(sort_order), 0) + 1 FROM skills')->fetchColumn();
+            $statement = db()->prepare('INSERT INTO skills (name, level, sort_order) VALUES (:name, :level, :sort_order)');
+            $statement->execute(['name' => $name, 'level' => $level, 'sort_order' => $nextOrder]);
             set_flash('success', 'Đã thêm kỹ năng.');
             redirect('/admin');
         }
@@ -137,8 +139,9 @@ try {
                 set_flash('error', 'Nhập tên, mô tả dự án và dùng liên kết http:// hoặc https:// nếu có.');
                 redirect('/admin');
             }
-            $statement = db()->prepare('INSERT INTO projects (title, description, tech_stack, project_url, sort_order) VALUES (:title, :description, :stack, :url, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM (SELECT sort_order FROM projects) AS ordered_projects))');
-            $statement->execute(['title' => $title, 'description' => $description, 'stack' => $stack, 'url' => $projectUrl ?? '']);
+            $nextOrder = (int) db()->query('SELECT COALESCE(MAX(sort_order), 0) + 1 FROM projects')->fetchColumn();
+            $statement = db()->prepare('INSERT INTO projects (title, description, tech_stack, project_url, sort_order) VALUES (:title, :description, :stack, :url, :sort_order)');
+            $statement->execute(['title' => $title, 'description' => $description, 'stack' => $stack, 'url' => $projectUrl ?? '', 'sort_order' => $nextOrder]);
             set_flash('success', 'Đã thêm dự án.');
             redirect('/admin');
         }

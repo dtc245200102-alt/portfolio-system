@@ -101,10 +101,11 @@ function profile(): array
 {
     $result = db()->query('SELECT * FROM profile WHERE id = 1')->fetch();
     return $result ?: [
-        'display_name' => 'Họ và tên của bạn',
-        'role_title' => 'Sinh viên Hệ thống Thông tin',
-        'tagline' => 'Tìm hiểu, xây dựng và vận hành các hệ thống web.',
-        'about_text' => 'Cập nhật phần giới thiệu của bạn trong trang quản trị.',
+        'display_name' => 'Nguyễn Văn Khánh',
+        'student_code' => 'DTC245200102',
+        'role_title' => 'Sinh viên',
+        'tagline' => 'Portfolio cá nhân và các dự án thực hành của tôi.',
+        'about_text' => 'Tôi là Nguyễn Văn Khánh, sinh viên mã số DTC245200102.',
         'email' => '',
         'github_url' => '',
     ];

@@ -1,0 +1,32 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: warn
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: portfolio-app
+    static_configs:
+      - targets: [localhost]
+        labels:
+          service: app
+          __path__: /var/log/portfolio/app/*.log
+
+  - job_name: portfolio-nginx
+    static_configs:
+      - targets: [localhost]
+        labels:
+          service: nginx
+          __path__: /var/log/portfolio/nginx/*.log
+
+  - job_name: portfolio-mysql
+    static_configs:
+      - targets: [localhost]
+        labels:
+          service: mysql
+          __path__: /var/log/portfolio/mysql/*.log

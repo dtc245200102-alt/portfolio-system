@@ -4,6 +4,7 @@ USE portfolio;
 CREATE TABLE IF NOT EXISTS profile (
     id TINYINT UNSIGNED NOT NULL PRIMARY KEY,
     display_name VARCHAR(120) NOT NULL,
+    student_code VARCHAR(40) NOT NULL DEFAULT '',
     role_title VARCHAR(180) NOT NULL,
     tagline VARCHAR(240) NOT NULL,
     about_text TEXT NOT NULL,
@@ -39,12 +40,11 @@ CREATE TABLE IF NOT EXISTS contact_messages (
     INDEX idx_contact_created_at (created_at)
 ) ENGINE=InnoDB;
 
-INSERT INTO profile (id, display_name, role_title, tagline, about_text, email, github_url)
-VALUES (1, 'Họ và tên của bạn', 'Sinh viên Hệ thống Thông tin',
-        'Tìm hiểu, xây dựng và vận hành các hệ thống web.',
-        'Xin chào! Đây là website portfolio mẫu. Hãy mở trang quản trị để cập nhật thông tin thật của bạn.',
-        '', '')
-ON DUPLICATE KEY UPDATE id = VALUES(id);
+INSERT IGNORE INTO profile (id, display_name, student_code, role_title, tagline, about_text, email, github_url)
+VALUES (1, 'Nguyễn Văn Khánh', 'DTC245200102', 'Sinh viên',
+        'Portfolio cá nhân và các dự án thực hành của tôi.',
+        'Tôi là Nguyễn Văn Khánh, sinh viên mã số DTC245200102. Đây là portfolio cá nhân để giới thiệu thông tin, kỹ năng và các dự án thực hành môn Triển khai và Quản trị Hệ thống Phần mềm.',
+        '', '');
 
 INSERT INTO skills (name, level, sort_order)
 SELECT 'PHP', 65, 1 WHERE NOT EXISTS (SELECT 1 FROM skills);
