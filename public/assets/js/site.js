@@ -22,6 +22,18 @@
 
     syncThemeButton();
 
+    window.addEventListener('storage', (event) => {
+        if (event.key !== 'portfolio-theme') return;
+        if (event.newValue === 'light') {
+            root.classList.remove('dark');
+        } else if (event.newValue === 'dark') {
+            root.classList.add('dark');
+        } else {
+            root.classList.toggle('dark', !window.matchMedia('(prefers-color-scheme: light)').matches);
+        }
+        syncThemeButton();
+    });
+
     if (themeButton) {
         themeButton.addEventListener('click', () => {
             const applyTheme = () => {
