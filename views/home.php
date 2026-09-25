@@ -11,7 +11,7 @@ $avatarPath = (string) ($profile['avatar_path'] ?? '');
     <link rel="stylesheet" href="/assets/css/site.css">
     <script src="/assets/js/site.js" defer></script>
 </head>
-<body>
+<body class="portfolio-body">
     <a class="skip-link" href="#main">Đi đến nội dung</a>
     <header class="site-header">
         <nav class="nav-shell" aria-label="Điều hướng chính">
@@ -72,7 +72,7 @@ $avatarPath = (string) ($profile['avatar_path'] ?? '');
 
         <section class="content-section" id="about">
             <div class="section-wrap split-section">
-                <div><p class="eyebrow">01 / Giới thiệu</p><h2 class="section-title">Một chút về tôi<span class="brand-dot">.</span></h2></div>
+                <div><p class="eyebrow">01 / Giới thiệu</p><h2 class="section-title">Một chút về tôi</h2></div>
                 <div class="about-copy"><p><?= nl2br(e($profile['about_text'])) ?></p>
                     <?php if ($facts): ?><div class="about-facts"><?php foreach ($facts as $index => $fact): ?><article><strong><?= e(sprintf('%02d', $index + 1)) ?></strong><span><?= e($fact['content']) ?></span></article><?php endforeach; ?></div><?php endif; ?>
                 </div>
@@ -81,7 +81,7 @@ $avatarPath = (string) ($profile['avatar_path'] ?? '');
 
         <section class="content-section education-section" id="education">
             <div class="section-wrap">
-                <p class="eyebrow">02 / Học vấn</p><h2 class="section-title">Hành trình học tập<span class="brand-dot">.</span></h2>
+                <p class="eyebrow">02 / Học vấn</p><h2 class="section-title">Hành trình học tập</h2>
                 <?php if (trim((string) ($profile['school_name'] ?? '')) !== '' || trim((string) ($profile['education_details'] ?? '')) !== ''): ?>
                     <article class="education-card"><div class="education-icon" aria-hidden="true">H</div><div><p class="education-label">TRƯỜNG HỌC</p><h3><?= e($profile['school_name'] ?: 'Tên trường chưa cập nhật') ?></h3><p><?= nl2br(e($profile['education_details'] ?: 'Nội dung học tập sẽ được cập nhật.')) ?></p></div></article>
                 <?php else: ?><p class="empty-state">Thông tin học vấn sẽ xuất hiện tại đây sau khi bạn cập nhật trong trang quản trị.</p><?php endif; ?>
@@ -90,7 +90,7 @@ $avatarPath = (string) ($profile['avatar_path'] ?? '');
 
         <section class="content-section section-tint" id="skills">
             <div class="section-wrap">
-                <p class="eyebrow">03 / Năng lực</p><h2 class="section-title">Kỹ năng đang phát triển<span class="brand-dot">.</span></h2>
+                <p class="eyebrow">03 / Năng lực</p><h2 class="section-title">Kỹ năng đang phát triển</h2>
                 <?php if ($skills): ?>
                     <div class="skills-grid">
                         <?php foreach ($skills as $skill): ?>
@@ -103,7 +103,7 @@ $avatarPath = (string) ($profile['avatar_path'] ?? '');
 
         <section class="content-section" id="projects">
             <div class="section-wrap">
-                <p class="eyebrow">04 / Sản phẩm</p><h2 class="section-title">Một số dự án<span class="brand-dot">.</span></h2>
+                <p class="eyebrow">04 / Sản phẩm</p><h2 class="section-title">Một số dự án</h2>
                 <?php if ($projects): ?>
                     <div class="projects-grid">
                         <?php foreach ($projects as $index => $project): ?>
@@ -116,7 +116,7 @@ $avatarPath = (string) ($profile['avatar_path'] ?? '');
 
         <section class="content-section contact-section" id="contact">
             <div class="section-wrap contact-layout">
-                <div><p class="eyebrow">05 / Kết nối</p><h2 class="section-title">Bạn có ý tưởng?<br>Cùng trao đổi nhé<span class="brand-dot">.</span></h2><p class="contact-note">Gửi lời nhắn, thông tin sẽ được lưu an toàn trong hệ thống để tôi phản hồi sau.</p><?php if ($profile['email']): ?><a class="text-link" href="mailto:<?= e($profile['email']) ?>"><?= e($profile['email']) ?> <span aria-hidden="true">↗</span></a><?php endif; ?></div>
+                <div><p class="eyebrow">05 / Kết nối</p><h2 class="section-title">Bạn có ý tưởng?<br>Cùng trao đổi nhé</h2><p class="contact-note">Gửi lời nhắn, thông tin sẽ được lưu an toàn trong hệ thống để tôi phản hồi sau.</p><?php if ($profile['email']): ?><a class="text-link" href="mailto:<?= e($profile['email']) ?>"><?= e($profile['email']) ?> <span aria-hidden="true">↗</span></a><?php endif; ?></div>
                 <form class="contact-form" action="/contact" method="post">
                     <?= csrf_field() ?>
                     <div class="honeypot" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off"></label></div>
