@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="white" stop-opacity="0"/>
+      <stop offset=".42" stop-color="white" stop-opacity=".22"/>
+      <stop offset="1" stop-color="white" stop-opacity="1"/>
+    </linearGradient>
+    <mask id="lower-wave"><rect width="1600" height="900" fill="url(#fade)"/></mask>
+    <filter id="soft-wave" x="-5%" y="-8%" width="110%" height="116%">
+      <feTurbulence type="fractalNoise" baseFrequency=".004 .018" numOctaves="1" seed="12" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <pattern id="mesh" width="38" height="30" patternUnits="userSpaceOnUse">
+      <path d="M38 0H0V30" fill="none" stroke="#5de4ca" stroke-opacity=".56" stroke-width=".8"/>
+    </pattern>
+    <linearGradient id="line-fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5de4ca" stop-opacity="0"/>
+      <stop offset=".26" stop-color="#5de4ca" stop-opacity=".72"/>
+      <stop offset=".76" stop-color="#5de4ca" stop-opacity=".46"/>
+      <stop offset="1" stop-color="#5de4ca" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g mask="url(#lower-wave)" fill="none" stroke="#5de4ca" stroke-width=".8" filter="url(#soft-wave)">
+    <rect x="-30" y="370" width="1660" height="570" fill="url(#mesh)" stroke="none"/>
+  </g>
+  <g fill="none" stroke="url(#line-fade)" stroke-width="1.15" opacity=".78">
+    <path d="M-30 690C210 615 333 652 526 716S838 795 1036 692s386-169 624-87"/>
+    <path d="M-30 728C214 651 337 688 530 752s312 79 510-24 386-169 624-87"/>
+    <path d="M-30 766C218 687 341 724 534 788s312 79 510-24 386-169 624-87"/>
+    <path d="M-30 804C222 723 345 760 538 824s312 79 510-24 386-169 624-87"/>
+    <path d="M-30 842C226 759 349 796 542 860s312 79 510-24 386-169 624-87"/>
+    <path d="M-30 880C230 795 353 832 546 896s312 79 510-24 386-169 624-87"/>
+  </g>
+  <g fill="none" stroke="#72f3d8" stroke-opacity=".33" stroke-width="1">
+    <path d="M270 606v156m0 0 7 9m-7-9-7 9M490 578v116m0 0 6 8m-6-8-6 8M720 622v144m0 0 7 8m-7-8-7 8M1008 568v161m0 0 7 8m-7-8-7 8M1265 535v145m0 0 7 8m-7-8-7 8M1460 606v138m0 0 7 8m-7-8-7 8"/>
+  </g>
+  <g fill="#6cebd1">
+    <circle cx="270" cy="606" r="3" opacity=".8"/><circle cx="490" cy="578" r="2.7" opacity=".68"/>
+    <circle cx="720" cy="622" r="3" opacity=".72"/><circle cx="1008" cy="568" r="3" opacity=".78"/>
+    <circle cx="1265" cy="535" r="2.5" opacity=".66"/><circle cx="1460" cy="606" r="3" opacity=".72"/>
+  </g>
+</svg>

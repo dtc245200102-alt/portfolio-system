@@ -1,5 +1,7 @@
 :root { color-scheme: dark; --bg: #0b1120; --surface: #111a2d; --surface-soft: #121c30; --text: #eef4ff; --muted: #99a8be; --line: rgba(161, 180, 208, .17); --accent: #58a6ff; --accent-2: #57e0c1; --shadow: 0 24px 80px rgba(0, 0, 0, .28); --card-outline: #c9d1dc; }
 html:not(.dark) { color-scheme: light; --bg: #f4f7fb; --surface: #ffffff; --surface-soft: #edf3fa; --text: #18243a; --muted: #5c6b80; --line: rgba(38, 57, 81, .15); --accent: #1769d2; --accent-2: #078f7a; --shadow: 0 24px 80px rgba(23, 49, 83, .12); --card-outline: #172033; }
+:root { --ambient-start: #08111f; --ambient-mid: #091723; --ambient-end: #071b1c; --mesh-opacity: .48; }
+html:not(.dark) { --ambient-start: #f8fbff; --ambient-mid: #f1f7fb; --ambient-end: #eaf8f5; --mesh-opacity: .38; }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: "Segoe UI", "Noto Sans", Tahoma, Arial, sans-serif; font-synthesis: none; line-height: 1.7; transition: background-color .5s ease, color .5s ease; }
@@ -9,6 +11,11 @@ body.portfolio-body::before, body.admin-body::before { inset: -12%; background: 
 body.portfolio-body::after, body.admin-body::after { background-image: linear-gradient(color-mix(in srgb, var(--line) 40%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--line) 40%, transparent) 1px, transparent 1px); background-size: 72px 72px; mask-image: linear-gradient(to bottom, rgba(0, 0, 0, .55), rgba(0, 0, 0, .18) 55%, transparent 92%); opacity: .28; }
 html:not(.dark) body.portfolio-body::before, html:not(.dark) body.admin-body::before { filter: blur(30px) saturate(.82); opacity: .6; }
 html:not(.dark) body.portfolio-body::after, html:not(.dark) body.admin-body::after { opacity: .2; }
+body.portfolio-body, body.admin-body { background: linear-gradient(138deg, var(--ambient-start), var(--ambient-mid) 56%, var(--ambient-end)); }
+body.portfolio-body::before, body.admin-body::before { inset: -15%; background: radial-gradient(ellipse 42% 38% at 14% 18%, color-mix(in srgb, var(--accent) 19%, transparent), transparent 72%), radial-gradient(ellipse 45% 43% at 83% 53%, color-mix(in srgb, var(--accent-2) 17%, transparent), transparent 74%), radial-gradient(ellipse 48% 37% at 50% 102%, rgba(49, 192, 181, .12), transparent 72%); filter: blur(36px) saturate(1.08); opacity: .9; transition: opacity .8s ease, filter .8s ease; }
+body.portfolio-body::after, body.admin-body::after { background: url('/assets/wave-mesh.svg') center bottom / cover no-repeat; mask-image: linear-gradient(to bottom, transparent 18%, rgba(0,0,0,.22) 42%, #000 100%); opacity: var(--mesh-opacity); mix-blend-mode: screen; animation: mesh-drift 32s ease-in-out infinite alternate; transition: opacity .7s ease; }
+html:not(.dark) body.portfolio-body::before, html:not(.dark) body.admin-body::before { filter: blur(40px) saturate(.78); opacity: .62; }
+html:not(.dark) body.portfolio-body::after, html:not(.dark) body.admin-body::after { mix-blend-mode: multiply; }
 a { color: inherit; text-decoration: none; }
 button, input, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -213,6 +220,7 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
 .reveal-item.is-visible { opacity: 1; transform: translateY(0); }
 @keyframes badge-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -7px; } }
 @keyframes aurora-drift { 0% { transform: translate3d(-1.2%, -1%, 0) scale(1); } 50% { transform: translate3d(1.1%, .7%, 0) scale(1.035); } 100% { transform: translate3d(-.5%, 1.1%, 0) scale(1.02); } }
+@keyframes mesh-drift { from { transform: translate3d(-.35%, .25%, 0) scale(1); } to { transform: translate3d(.35%, -.25%, 0) scale(1.025); } }
 @keyframes login-enter { from { opacity: 0; transform: translateY(18px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes login-orb { from { transform: scale(.94) translate3d(-6px, 5px, 0); opacity: .72; } to { transform: scale(1.08) translate3d(8px, -5px, 0); opacity: 1; } }
 @keyframes login-float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-6px) rotate(-2deg); } }
