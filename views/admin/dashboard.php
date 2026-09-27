@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="vi" class="dark">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Quản trị nội dung · Portfolio</title><link rel="stylesheet" href="/assets/css/site.css"><script src="/assets/js/site.js" defer></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Quản trị nội dung · Portfolio</title><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://storage.googleapis.com" crossorigin><link rel="stylesheet" href="/assets/css/site.css"><script src="/assets/js/site.js" defer></script><script src="/assets/js/background-removal.js?v=1" defer></script></head>
 <body class="admin-body">
     <header class="admin-header"><a class="brand" href="/"><span class="brand-mark">H</span><span>Hồ sơ cá nhân</span><span class="admin-label">Quản trị</span></a><div class="nav-actions"><button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Chuyển giao diện sáng tối" aria-pressed="true"><svg class="theme-glyph theme-glyph-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42 1.42"/></svg><svg class="theme-glyph theme-glyph-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 15.3A8.7 8.7 0 0 1 8.7 3.6 8.8 8.8 0 1 0 20.4 15.3Z"/></svg></button><a class="button button-quiet button-small" href="/" target="_blank" rel="noopener noreferrer">Xem website ↗</a><form action="/admin/logout" method="post"><?= csrf_field() ?><button class="button button-small" type="submit">Đăng xuất</button></form></div></header>
     <main class="admin-main">
@@ -10,10 +10,13 @@
         <section class="admin-panel"><div class="panel-heading"><div><p class="eyebrow">01 / Hồ sơ</p><h2>Thông tin cá nhân</h2><p class="muted">Tại đây bạn có thể thay đổi toàn bộ nội dung hồ sơ, thông tin liên hệ và ảnh hiển thị trên thẻ.</p></div></div>
             <div class="avatar-manager">
                 <?php if (!empty($profile['avatar_path'])): ?><img class="avatar-preview" src="<?= e($profile['avatar_path']) ?>" alt="Ảnh đại diện hiện tại"><?php else: ?><div class="avatar-preview avatar-placeholder" aria-hidden="true"><?= e(mb_strtoupper(mb_substr((string) $profile['display_name'], 0, 1, 'UTF-8'), 'UTF-8')) ?></div><?php endif; ?>
-                <form action="/admin/avatar" method="post" enctype="multipart/form-data" class="admin-form avatar-form">
+                <form action="/admin/avatar" method="post" enctype="multipart/form-data" class="admin-form avatar-form" data-background-removal-form>
                     <?= csrf_field() ?>
-                    <label for="avatar-upload">Ảnh đại diện (JPG, PNG hoặc WebP; tối đa 2 MB)</label>
+                    <input type="hidden" name="avatar_cutout" value="1">
+                    <label for="avatar-upload">Ảnh chân dung (JPG, PNG hoặc WebP; tối đa 8 MB)</label>
                     <input id="avatar-upload" name="avatar" type="file" accept="image/jpeg,image/png,image/webp" required>
+                    <p class="avatar-processing-status" data-avatar-status role="status" aria-live="polite">Ảnh sẽ được tách nền tự động ngay trên thiết bị của bạn.</p>
+                    <img class="avatar-selected-preview" data-avatar-preview alt="Xem trước ảnh đã tách nền" hidden>
                     <div class="avatar-actions"><button class="button button-small" type="submit">Cập nhật ảnh</button><?php if (!empty($profile['avatar_path'])): ?><button class="button button-danger button-small" type="submit" name="remove_avatar" value="1" formnovalidate>Xóa ảnh</button><?php endif; ?></div>
                 </form>
             </div>

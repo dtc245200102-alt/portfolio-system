@@ -7,6 +7,7 @@ require_once dirname(__DIR__) . '/helpers.php';
 $connection = db();
 $newColumns = [
     'avatar_path' => "ALTER TABLE profile ADD COLUMN avatar_path VARCHAR(255) NOT NULL DEFAULT '' AFTER github_url",
+    'avatar_is_cutout' => "ALTER TABLE profile ADD COLUMN avatar_is_cutout TINYINT(1) NOT NULL DEFAULT 0 AFTER avatar_path",
     'school_name' => "ALTER TABLE profile ADD COLUMN school_name VARCHAR(180) NOT NULL DEFAULT '' AFTER student_code",
     'education_details' => "ALTER TABLE profile ADD COLUMN education_details TEXT NOT NULL DEFAULT ('') AFTER school_name",
 ];

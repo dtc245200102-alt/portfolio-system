@@ -22,6 +22,89 @@
 
     syncThemeButton();
 
+    const navigationToggle = document.querySelector('[data-nav-toggle]');
+    const navigationDrawer = document.getElementById('primary-navigation');
+    const navigationBackdrop = document.querySelector('[data-nav-close]');
+    const mobileNavigation = window.matchMedia('(max-width: 900px)');
+    let previousBodyOverflow = '';
+
+    const setNavigationOpen = (open, returnFocus = false) => {
+        if (!navigationToggle || !navigationDrawer || !mobileNavigation.matches) return;
+
+        document.body.classList.toggle('nav-open', open);
+        navigationToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        navigationToggle.setAttribute('aria-label', open ? 'Đóng menu điều hướng' : 'Mở menu điều hướng');
+        navigationDrawer.setAttribute('aria-hidden', open ? 'false' : 'true');
+        navigationDrawer.inert = !open;
+
+        if (navigationBackdrop) {
+            navigationBackdrop.setAttribute('aria-hidden', open ? 'false' : 'true');
+            navigationBackdrop.tabIndex = open ? 0 : -1;
+        }
+
+        if (open) {
+            previousBodyOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            window.setTimeout(() => navigationDrawer.querySelector('a')?.focus(), 260);
+        } else {
+            document.body.style.overflow = previousBodyOverflow;
+            if (returnFocus) navigationToggle.focus();
+        }
+    };
+
+    const syncNavigationViewport = () => {
+        if (!navigationToggle || !navigationDrawer) return;
+        if (mobileNavigation.matches) {
+            navigationToggle.setAttribute('aria-expanded', 'false');
+            navigationToggle.setAttribute('aria-label', 'Mở menu điều hướng');
+            navigationDrawer.setAttribute('aria-hidden', 'true');
+            navigationDrawer.inert = true;
+            if (navigationBackdrop) navigationBackdrop.setAttribute('aria-hidden', 'true');
+        } else {
+            document.body.classList.remove('nav-open');
+            document.body.style.overflow = previousBodyOverflow;
+            navigationToggle.setAttribute('aria-expanded', 'false');
+            navigationDrawer.setAttribute('aria-hidden', 'false');
+            navigationDrawer.inert = false;
+            if (navigationBackdrop) navigationBackdrop.setAttribute('aria-hidden', 'true');
+        }
+    };
+
+    syncNavigationViewport();
+    mobileNavigation.addEventListener('change', syncNavigationViewport);
+    navigationToggle?.addEventListener('click', () => {
+        setNavigationOpen(navigationToggle.getAttribute('aria-expanded') !== 'true');
+    });
+    navigationBackdrop?.addEventListener('click', () => setNavigationOpen(false, true));
+    navigationDrawer?.addEventListener('click', (event) => {
+        if (event.target.closest('a')) setNavigationOpen(false);
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && navigationToggle?.getAttribute('aria-expanded') === 'true') {
+            setNavigationOpen(false, true);
+            return;
+        }
+
+        if (event.key === 'Tab' && navigationToggle?.getAttribute('aria-expanded') === 'true') {
+            const drawerLinks = [...navigationDrawer.querySelectorAll('a')];
+            const firstLink = drawerLinks[0];
+            const lastLink = drawerLinks[drawerLinks.length - 1];
+            if (event.shiftKey && (document.activeElement === firstLink || document.activeElement === navigationBackdrop)) {
+                event.preventDefault();
+                navigationToggle.focus();
+            } else if (!event.shiftKey && document.activeElement === navigationToggle) {
+                event.preventDefault();
+                firstLink?.focus();
+            } else if (event.shiftKey && document.activeElement === navigationToggle) {
+                event.preventDefault();
+                lastLink?.focus();
+            } else if (!event.shiftKey && document.activeElement === lastLink) {
+                event.preventDefault();
+                navigationToggle.focus();
+            }
+        }
+    });
+
     window.addEventListener('storage', (event) => {
         if (event.key !== 'portfolio-theme') return;
         if (event.newValue === 'light') {
@@ -68,7 +151,7 @@
         });
     }
 
-    const revealItems = document.querySelectorAll('.hero-copy, .hero-art, .content-section .section-wrap');
+    const revealItems = document.querySelectorAll('.content-section .section-wrap');
     if (!reducedMotion && 'IntersectionObserver' in window) {
         const revealObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach((entry) => {

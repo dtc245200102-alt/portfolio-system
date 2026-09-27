@@ -118,11 +118,11 @@ try {
             if (!$removeAvatar) {
                 $upload = $_FILES['avatar'] ?? null;
                 if (!is_array($upload) || ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-                    set_flash('error', 'Chọn một ảnh JPG, PNG hoặc WebP nhỏ hơn 2 MB rồi thử lại.');
+                    set_flash('error', 'Chọn một ảnh JPG, PNG hoặc WebP nhỏ hơn 8 MB rồi thử lại.');
                     redirect('/admin');
                 }
-                if ((int) ($upload['size'] ?? 0) < 1 || (int) $upload['size'] > 2 * 1024 * 1024) {
-                    set_flash('error', 'Ảnh phải có dung lượng nhỏ hơn 2 MB.');
+                if ((int) ($upload['size'] ?? 0) < 1 || (int) $upload['size'] > 8 * 1024 * 1024) {
+                    set_flash('error', 'Ảnh phải có dung lượng nhỏ hơn 8 MB.');
                     redirect('/admin');
                 }
 
@@ -150,8 +150,9 @@ try {
                 $avatarPath = '/uploads/' . $filename;
             }
 
-            $statement = db()->prepare('UPDATE profile SET avatar_path = :avatar_path WHERE id = 1');
-            $statement->execute(['avatar_path' => $avatarPath]);
+            $isCutout = !$removeAvatar && $avatarPath !== '' && $mime === 'image/png' && (string) ($_POST['avatar_cutout'] ?? '') === '1';
+            $statement = db()->prepare('UPDATE profile SET avatar_path = :avatar_path, avatar_is_cutout = :avatar_is_cutout WHERE id = 1');
+            $statement->execute(['avatar_path' => $avatarPath, 'avatar_is_cutout' => $isCutout ? 1 : 0]);
             if ($currentAvatar !== $avatarPath && preg_match('~^/uploads/[a-f0-9]{32}\.(?:jpg|png|webp)$~D', $currentAvatar) === 1) {
                 @unlink(APP_ROOT . '/public' . $currentAvatar);
             }

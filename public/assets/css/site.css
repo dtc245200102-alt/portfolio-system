@@ -145,9 +145,17 @@ progress::-moz-progress-bar { border-radius: 99px; background: linear-gradient(9
 .admin-panel { margin-top: 18px; padding: 26px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); box-shadow: 0 12px 40px rgba(0,0,0,.1); transition: background-color .5s ease, border-color .5s ease, box-shadow .5s ease, color .5s ease; }
 .avatar-manager { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--bg); }
 .avatar-preview { display: block; flex: 0 0 92px; width: 92px; height: 92px; object-fit: cover; border: 1px solid var(--line); border-radius: 18px; }
+.avatar-preview, .avatar-selected-preview { background-color: var(--surface); background-image: linear-gradient(45deg, color-mix(in srgb, var(--muted) 14%, transparent) 25%, transparent 25%), linear-gradient(-45deg, color-mix(in srgb, var(--muted) 14%, transparent) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, color-mix(in srgb, var(--muted) 14%, transparent) 75%), linear-gradient(-45deg, transparent 75%, color-mix(in srgb, var(--muted) 14%, transparent) 75%); background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0; }
 .avatar-placeholder { display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #07101d; font-size: 2rem; font-weight: 800; }
 .avatar-form { flex: 1; min-width: 0; }
 .avatar-form input[type="file"] { cursor: pointer; }
+.avatar-processing-status { margin: 8px 0 14px; color: var(--muted); font-size: .9rem; }
+.avatar-processing-status[data-state="working"] { color: var(--accent); }
+.avatar-processing-status[data-state="success"] { color: var(--accent-2); }
+.avatar-processing-status[data-state="error"] { color: #d45f65; }
+.avatar-selected-preview { display: block; width: min(100%, 240px); max-height: 300px; margin: 0 0 16px; object-fit: contain; border: 1px solid var(--line); border-radius: 12px; }
+.avatar-selected-preview[hidden] { display: none; }
+.avatar-actions button:disabled { opacity: .6; cursor: wait; }
 .avatar-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .panel-heading { display: flex; justify-content: space-between; margin-bottom: 20px; }
 .panel-heading h2 { margin: 0; font-size: 1.35rem; }
