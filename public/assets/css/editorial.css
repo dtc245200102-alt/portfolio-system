@@ -73,7 +73,18 @@ body.portfolio-body :focus-visible {
     z-index: 50;
     border-color: var(--line);
     background: color-mix(in srgb, var(--bg) 88%, transparent);
-    transition: background-color .65s ease, border-color .65s ease, color .65s ease;
+    transition: transform .38s cubic-bezier(.22, 1, .36, 1), background-color .65s ease, border-color .65s ease, color .65s ease;
+    will-change: transform;
+}
+
+.site-header.is-scrolled {
+    background: color-mix(in srgb, var(--bg) 96%, transparent);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+.site-header.is-hidden {
+    transform: translateY(calc(-100% - 2px));
+    pointer-events: none;
 }
 
 .nav-shell {

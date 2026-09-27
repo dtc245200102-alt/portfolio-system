@@ -105,6 +105,55 @@
         }
     });
 
+    const siteHeader = document.querySelector('.portfolio-body .site-header');
+    if (siteHeader) {
+        let previousScrollY = window.scrollY;
+        let scrollIntent = 0;
+        let scrollDirection = 0;
+        let headerFrame = 0;
+
+        const revealHeader = () => {
+            siteHeader.classList.remove('is-hidden');
+            scrollIntent = 0;
+        };
+
+        const updateHeader = () => {
+            headerFrame = 0;
+            const currentScrollY = Math.max(0, window.scrollY);
+            const delta = currentScrollY - previousScrollY;
+            previousScrollY = currentScrollY;
+            siteHeader.classList.toggle('is-scrolled', currentScrollY > 24);
+
+            if (currentScrollY <= 96 || document.body.classList.contains('nav-open') || siteHeader.contains(document.activeElement)) {
+                revealHeader();
+                return;
+            }
+
+            if (!delta) return;
+            const nextDirection = Math.sign(delta);
+            if (nextDirection !== scrollDirection) {
+                scrollDirection = nextDirection;
+                scrollIntent = 0;
+            }
+            scrollIntent += Math.abs(delta);
+
+            const threshold = nextDirection > 0 ? 14 : 8;
+            if (scrollIntent >= threshold) {
+                siteHeader.classList.toggle('is-hidden', nextDirection > 0);
+                scrollIntent = 0;
+            }
+        };
+
+        window.addEventListener('scroll', () => {
+            if (!headerFrame) headerFrame = window.requestAnimationFrame(updateHeader);
+        }, { passive: true });
+        window.addEventListener('pointermove', (event) => {
+            if (event.clientY <= 16) revealHeader();
+        }, { passive: true });
+        siteHeader.addEventListener('focusin', revealHeader);
+        updateHeader();
+    }
+
     window.addEventListener('storage', (event) => {
         if (event.key !== 'portfolio-theme') return;
         if (event.newValue === 'light') {
