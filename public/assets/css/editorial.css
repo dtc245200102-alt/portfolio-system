@@ -617,6 +617,7 @@ progress::-webkit-progress-bar, progress::-webkit-progress-value, progress::-moz
 .hero-art {
     min-height: min(720px, calc(100dvh - 210px));
     overflow: visible;
+    translate: -13vw 0;
 }
 .hero-art::before {
     position: absolute;
@@ -644,13 +645,11 @@ progress::-webkit-progress-bar, progress::-webkit-progress-value, progress::-moz
     z-index: 2;
     display: block;
     width: auto;
-    height: min(74vh, 700px);
-    max-width: min(100%, 540px);
+    height: min(80vh, 760px);
+    max-width: min(100%, 660px);
     object-fit: contain;
     object-position: center bottom;
     filter: drop-shadow(0 24px 32px color-mix(in srgb, var(--text) 15%, transparent));
-    transform: translateY(10px);
-    animation: portrait-float 7.5s ease-in-out infinite;
     transition: opacity .55s ease, filter .65s ease;
 }
 .portrait-cutout[data-cutout-on-view="processing"] { opacity: .18; }
@@ -672,15 +671,14 @@ progress::-webkit-progress-bar, progress::-webkit-progress-value, progress::-moz
 html:not(.dark) .marquee-track { opacity: .13; }
 html:not(.dark) .portrait-cutout { filter: drop-shadow(0 25px 29px rgba(25, 43, 50, .2)); }
 
-@keyframes portrait-float { 0%, 100% { transform: translateY(10px); } 50% { transform: translateY(-5px); } }
 @keyframes portrait-ring { to { rotate: 342deg; } }
 @keyframes aura-breathe { from { opacity: .42; transform: scale(.92); } to { opacity: .76; transform: scale(1.08); } }
 
 @media (max-width: 900px) {
     .hero { grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr); }
     .hero h1 { font-size: clamp(4rem, 8vw, 6.2rem); }
-    .hero-art { min-height: min(560px, calc(100dvh - 235px)); }
-    .portrait-cutout { height: min(64vh, 570px); max-width: 100%; }
+    .hero-art { min-height: min(600px, calc(100dvh - 235px)); translate: 0 0; }
+    .portrait-cutout { height: min(72vh, 650px); max-width: 100%; }
 }
 
 @media (max-width: 760px) {
@@ -688,7 +686,7 @@ html:not(.dark) .portrait-cutout { filter: drop-shadow(0 25px 29px rgba(25, 43, 
     .hero-marquee { top: 31%; }
     .hero h1 { font-size: clamp(4.25rem, 16vw, 6.4rem); }
     .hero-art { min-height: min(590px, 65vh); margin-top: 8px; }
-    .portrait-cutout { height: min(58vh, 550px); max-width: 88vw; }
+    .portrait-cutout { height: min(66vh, 600px); max-width: 94vw; }
 }
 
 @media (max-width: 390px) {
