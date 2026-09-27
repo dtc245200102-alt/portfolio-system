@@ -14,7 +14,7 @@ $avatarNeedsCutout = $avatarPath !== '' && empty($profile['avatar_is_cutout']);
     <link rel="preconnect" href="https://db.onlinewebfonts.com" crossorigin>
     <link rel="stylesheet" href="https://db.onlinewebfonts.com/c/95cecf452d3208890088a5b4c19c7ecf?family=Helvetica+Neue+ME">
     <link rel="stylesheet" href="/assets/css/site.css">
-    <link rel="stylesheet" href="/assets/css/editorial.css?v=2">
+    <link rel="stylesheet" href="/assets/css/editorial.css?v=3">
     <script src="/assets/js/site.js?v=2" defer></script>
     <script src="/assets/js/background-removal.js?v=1" defer></script>
 </head>
