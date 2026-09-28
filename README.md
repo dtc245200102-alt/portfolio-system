@@ -1,125 +1,207 @@
-# Hệ thống Portfolio cá nhân
+# Website Portfolio cá nhân
 
-Website giới thiệu cá nhân có khu vực quản trị nội dung, tải ảnh đại diện, mục học vấn có thể chỉnh sửa, MySQL/phpMyAdmin, Nginx HTTPS, Prometheus/Grafana và Loki/Promtail. Các dịch vụ chạy bằng Docker Compose; mật khẩu và chứng thư tự ký được tạo riêng trên máy chạy hệ thống.
+Đây là bài thực hành môn **Triển khai và Quản trị Hệ thống Phần mềm**. Dự án gồm website portfolio có trang quản trị, MySQL, phpMyAdmin, Nginx, Prometheus, Grafana, Loki và Promtail. Các dịch vụ được khai báo và khởi chạy bằng Docker Compose.
 
-Portfolio đã được điền sẵn tên Nguyễn Văn Khánh và mã sinh viên DTC245200102. Bạn có thể sửa các thông tin này trong trang **Quản trị → Thông tin cá nhân**.
+Repository: [github.com/dtc245200102-alt/portfolio-system](https://github.com/dtc245200102-alt/portfolio-system)
 
-## 1. Thành phần
+Sinh viên thực hiện: **Nguyễn Văn Khánh** · Mã số sinh viên: **DTC245200102**
 
-| Thành phần | Vai trò |
+Website hiện được cấu hình để truy cập trên máy đang chạy Docker Desktop qua `localhost`. Chứng thư HTTPS tự ký phục vụ môi trường thực hành, không phải chứng thư dùng cho website công khai.
+
+## Chức năng
+
+- Khách truy cập xem hồ sơ, học vấn, kỹ năng, dự án và gửi lời nhắn liên hệ.
+- Quản trị viên đăng nhập để sửa thông tin hồ sơ và học vấn, thay ảnh, quản lý các mục giới thiệu, thêm hoặc xóa kỹ năng và dự án, xem hoặc xóa lời nhắn.
+- Ảnh JPG, PNG và WebP, tối đa 8 MB, được tách nền trên trình duyệt trước khi lưu. Lần đầu cần Internet để tải thư viện và mô hình xử lý ảnh.
+- Giao diện có chế độ sáng và tối.
+
+## Các thành phần
+
+| Thành phần | Công việc |
 | --- | --- |
-| PHP-FPM 8.4 | Trang portfolio, đăng nhập quản trị, CRUD nội dung và xử lý liên hệ |
-| MySQL 8.4 | Lưu hồ sơ, kỹ năng, dự án và tin nhắn |
-| phpMyAdmin | Quản lý cơ sở dữ liệu qua trình duyệt |
-| Nginx | Reverse proxy tới PHP-FPM, chuyển HTTP sang HTTPS và thêm security headers |
-| Prometheus + cAdvisor + exporters | Thu thập số liệu container, Nginx và MySQL |
-| Grafana | Dashboard dựng sẵn cho CPU/bộ nhớ container, Nginx, MySQL và log |
-| Loki + Promtail | Thu thập log ứng dụng, Nginx và MySQL để truy vấn bằng LogQL |
+| PHP-FPM 8.4 | Xử lý trang portfolio, đăng nhập quản trị và dữ liệu biểu mẫu. |
+| MySQL 8.4 | Lưu hồ sơ, các mục giới thiệu, kỹ năng, dự án và lời nhắn. |
+| phpMyAdmin 5.2 | Giao diện quản lý MySQL; bật bằng Compose profile `tools`. |
+| Nginx | Reverse proxy tới PHP-FPM, chuyển HTTP sang HTTPS và thêm security headers. |
+| Prometheus, cAdvisor và exporters | Thu thập số liệu container, Nginx và MySQL. |
+| Grafana 12 | Hiển thị dashboard đã cấu hình sẵn từ Prometheus và Loki. |
+| Loki và Promtail | Thu thập log ứng dụng, Nginx, MySQL và phục vụ truy vấn LogQL. |
 
-## 2. Chạy lần đầu trên Windows
+## Yêu cầu để chạy
 
-1. Cài Docker Desktop, bật Linux containers/WSL 2 và mở Docker Desktop.
-2. Mở PowerShell tại thư mục chứa `compose.yaml`.
-3. Tạo mật khẩu ngẫu nhiên cho cơ sở dữ liệu, tài khoản quản trị và Grafana:
+- Windows với PowerShell.
+- Docker Desktop đã cài đặt và đang chạy Linux containers qua WSL 2.
+- Git để tải repository.
+- Internet trong lần đầu tải image Docker và lần đầu dùng chức năng tách nền ảnh.
 
-   ```powershell
-   Set-ExecutionPolicy -Scope Process Bypass
-   .\scripts\setup-secrets.ps1
-   ```
+## Cài đặt và chạy lần đầu
 
-   Ghi lại mật khẩu Portfolio admin và Grafana được in ra. Các file trong `secrets/` chứa mật khẩu thật và đã được loại khỏi Git.
+### 1. Tải mã nguồn
 
-4. Khởi động website cùng phpMyAdmin:
+Mở PowerShell tại thư mục muốn lưu dự án:
 
-   ```powershell
-   docker compose --profile tools up -d --build
-   ```
+```powershell
+git clone https://github.com/dtc245200102-alt/portfolio-system.git
+Set-Location .\portfolio-system
+```
 
-5. Mở các địa chỉ sau:
+Các lệnh Compose bên dưới cần được chạy trong thư mục có file `compose.yaml`.
 
-   - Website: [https://localhost:8443](https://localhost:8443)
-   - Trang quản trị: [https://localhost:8443/admin](https://localhost:8443/admin)
-   - phpMyAdmin: [http://localhost:8081](http://localhost:8081)
-   - Grafana: [http://localhost:3000](http://localhost:3000)
-   - Prometheus: [http://localhost:9090](http://localhost:9090)
+### 2. Tạo mật khẩu cục bộ
 
-   Chứng thư HTTPS được tự tạo để thực hành nên trình duyệt sẽ báo chưa tin cậy. Xác nhận tiếp tục tới `localhost`; không dùng chứng thư này cho website công khai.
+Chạy script tạo các file secrets:
 
-6. Đăng nhập trang quản trị với tên `admin` và mật khẩu vừa được in ra. Tại đây có thể thay ảnh chân dung, sửa hồ sơ và thông tin học vấn, thêm hoặc xóa kỹ năng/dự án, rồi gửi thử một lời nhắn ở website để xem tin nhắn trong mục **Hộp thư**. Khi chọn ảnh JPG, PNG hoặc WebP (tối đa 8 MB), trình duyệt sẽ tự tách nền và hiển thị bản xem trước trước khi lưu. Tác vụ dùng MediaPipe Image Segmenter chạy trên trình duyệt; ảnh gốc không được gửi tới máy chủ xử lý ảnh bên ngoài. Lần đầu sử dụng cần Internet để tải thư viện và mô hình.
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\scripts\setup-secrets.ps1
+```
 
-7. Đăng nhập Grafana với tên `admin` và mật khẩu Grafana đã được in ra. Dashboard **Portfolio System Overview** được nạp tự động. Trong phpMyAdmin, chọn máy chủ `db`, database `portfolio`, rồi đăng nhập bằng `portfolio_app` và mật khẩu trong `secrets/db_app_password.txt`.
+Ghi lại mật khẩu Portfolio admin và Grafana mà script in ra. Script chỉ hiện hai mật khẩu này lúc tạo và không ghi đè file secrets đã có. Nếu thư mục `secrets` đã được thiết lập, bỏ qua bước này; không xóa hoặc tạo lại các mật khẩu khi database đang dùng chúng.
 
-## 3. Kiểm tra các phần của đề tài
+Các file trong `secrets/` chứa thông tin đăng nhập cục bộ và được Git bỏ qua. Không đưa các file này lên GitHub.
 
-### Nginx và HTTPS
+### 3. Khởi chạy toàn bộ hệ thống
 
-Truy cập `http://localhost:8080` để xem Nginx chuyển hướng sang HTTPS. Các header được cấu hình trong `infra/nginx/default.conf`: CSP, HSTS, `X-Content-Type-Options`, `X-Frame-Options`, Referrer-Policy và Permissions-Policy.
+Profile `tools` bật phpMyAdmin để dùng trong phần trình diễn:
+
+```powershell
+docker compose --profile tools up -d --build
+docker compose ps
+```
+
+Lần đầu, Docker cần tải các image và ứng dụng cần thời gian để tạo cơ sở dữ liệu, chạy migration, sinh chứng thư localhost và khởi động các dịch vụ. Có thể dùng `docker compose ps` để xem trạng thái từng container.
+
+### 4. Mở các dịch vụ
+
+| Dịch vụ | Địa chỉ trên máy chạy Docker |
+| --- | --- |
+| Website | [https://localhost:8443](https://localhost:8443) |
+| Trang quản trị | [https://localhost:8443/admin](https://localhost:8443/admin) |
+| phpMyAdmin | [http://localhost:8081](http://localhost:8081) |
+| Grafana | [http://localhost:3000](http://localhost:3000) |
+| Prometheus | [http://localhost:9090](http://localhost:9090) |
+
+Trình duyệt sẽ cảnh báo chứng thư khi mở HTTPS vì chứng thư được tự ký cho `localhost`. Đây là cấu hình của môi trường thực hành trên máy cá nhân.
+
+### 5. Đăng nhập quản trị và công cụ
+
+- **Portfolio admin:** tên đăng nhập `admin`; mật khẩu được tạo ở bước 2. Nếu cần xem lại, mật khẩu nằm trong `secrets/admin_password.txt` trên máy đã chạy script.
+- **Grafana:** tên đăng nhập `admin`; mật khẩu nằm trong `secrets/grafana_admin_password.txt`.
+- **phpMyAdmin:** máy chủ MySQL được cấu hình là `db`. Dùng database `portfolio`, tài khoản ứng dụng `portfolio_app` và mật khẩu trong `secrets/db_app_password.txt`.
+
+Không chép mật khẩu thật vào README, báo cáo công khai hoặc GitHub.
+
+## Chạy lại sau khi tắt máy
+
+Mở Docker Desktop, chờ Docker Engine chạy, rồi mở PowerShell tại thư mục dự án. Với bản đang đặt ở `D:\portfolio-system`, dùng:
+
+```powershell
+Set-Location 'D:\portfolio-system'
+docker compose --profile tools up -d
+docker compose ps
+```
+
+Lệnh này khởi động lại các dịch vụ đã tạo và giữ dữ liệu trong Docker volumes. Không cần tạo lại secrets nếu các file trong `secrets/` vẫn còn.
+
+## Kiểm tra và trình diễn theo tiêu chí đề tài
+
+### Mã nguồn trên GitHub
+
+Repository công khai ở đường dẫn đầu README. Có thể xem các commit bằng:
+
+```powershell
+git status --short --branch
+git log --oneline --reverse
+```
+
+Các commit đầu ghi nhận những mốc chính: ứng dụng PHP/MySQL, Compose cùng Nginx HTTPS, rồi giám sát và hướng dẫn chạy. Các thay đổi tiếp theo được lưu thành những commit riêng trong cùng lịch sử.
+
+Ba commit triển khai ban đầu có nội dung:
+
+- `feat: build portfolio app with MySQL`
+- `feat: add Compose deployment and HTTPS reverse proxy`
+- `feat: finalize portfolio with monitoring and setup guide`
+
+### Website, trang quản trị và cơ sở dữ liệu
+
+Mở website và trang `/admin`; đăng nhập rồi thử cập nhật một trường hồ sơ. Mở phpMyAdmin để xem database `portfolio` và các bảng `profile`, `about_facts`, `skills`, `projects`, `contact_messages`. `docker compose ps` cho biết trạng thái ứng dụng, web, database và phpMyAdmin.
+
+### Nginx, HTTPS và security headers
+
+Nginx nhận cổng HTTP `8080` rồi chuyển hướng sang HTTPS `8443`. Có thể kiểm tra phản hồi trong PowerShell:
+
+```powershell
+curl.exe -I http://localhost:8080
+curl.exe -k -I https://localhost:8443
+```
+
+Lệnh đầu kiểm tra chuyển hướng; lệnh thứ hai hiển thị các header HTTPS. Cấu hình nằm trong `infra/nginx/default.conf`.
 
 ### Prometheus và Grafana
 
-Trong Prometheus, mở **Status → Targets**. Các job `containers`, `nginx` và `mysql` cần ở trạng thái `UP`. Dashboard Grafana có số liệu CPU/bộ nhớ từng container, lưu lượng Nginx, kết nối MySQL và log Nginx.
+Trong Prometheus, mở **Status → Targets**. Cấu hình có các job `prometheus`, `containers`, `nginx` và `mysql`; kiểm tra trạng thái của từng job tại thời điểm trình diễn. Trong Grafana, dashboard **Portfolio System Overview** được nạp từ cấu hình trong repository. Tên tài khoản là `admin`; dùng mật khẩu đã tạo ở bước 2.
 
-### LogQL trong Grafana Explore
+### Loki, Promtail và LogQL
 
-Chọn datasource **Loki** rồi chạy từng truy vấn:
+Trong Grafana, chọn **Explore**, datasource **Loki**, rồi chạy các truy vấn sau. Chọn khoảng thời gian phù hợp với lúc hệ thống có log:
 
 ```logql
 {service="nginx"}
 ```
 
+Hiển thị log Nginx.
+
 ```logql
 {service="app"} |= "contact_message_received"
 ```
+
+Lọc sự kiện sau khi một lời nhắn hợp lệ được gửi từ biểu mẫu liên hệ. Ứng dụng chỉ ghi sự kiện nhận lời nhắn, không ghi nội dung riêng tư của lời nhắn vào log.
 
 ```logql
 {service="mysql"}
 ```
 
-Lời nhắn của người dùng không được ghi vào log ứng dụng; chỉ ghi sự kiện nhận lời nhắn để tránh lộ nội dung cá nhân.
+Hiển thị log MySQL trong khoảng thời gian đã chọn. Promtail đọc log ứng dụng, Nginx và MySQL từ volume dùng chung rồi gửi tới Loki.
 
-### Các lệnh Docker thường dùng
+### Hardening
+
+Các cấu hình có thể đối chiếu trong repository:
+
+- Các mạng `application`, `database` và `monitoring` được khai báo nội bộ; các cổng website, phpMyAdmin, Grafana và Prometheus chỉ bind vào loopback `127.0.0.1`.
+- Mật khẩu nằm trong Docker secrets ở thư mục `secrets/`; `.gitignore` loại các file này khỏi Git.
+- PHP-FPM chạy bằng `www-data`; Nginx dùng image unprivileged.
+- Nhiều dịch vụ dùng filesystem chỉ đọc, `no-new-privileges` và loại bỏ Linux capabilities không cần thiết.
+- Nginx đặt các header CSP, HSTS, `X-Content-Type-Options`, `X-Frame-Options`, Referrer-Policy và Permissions-Policy.
+
+cAdvisor cần đọc Docker socket để thu thập số liệu container. Socket được gắn chỉ đọc nhưng vẫn là giao diện nhạy cảm; chỉ nên chạy stack này trên máy phát triển đáng tin cậy.
+
+### Ảnh minh chứng cho báo cáo và buổi demo
+
+Sau khi chạy và kiểm tra các bước trên, có thể chụp màn hình website và trang quản trị, database trong phpMyAdmin, phản hồi HTTPS/header của Nginx, Prometheus Targets, dashboard Grafana và kết quả các truy vấn LogQL. Chỉ đưa vào báo cáo những trạng thái đã quan sát được trên máy chạy.
+
+## Lệnh vận hành thường dùng
 
 ```powershell
 docker compose ps
-docker compose logs -f web app db
-docker compose logs -f loki promtail
-docker compose down
+docker compose logs --tail 100 web app db
+docker compose logs --tail 100 loki promtail
+docker compose --profile tools down
 ```
 
-Muốn chạy các dịch vụ mặc định mà không có phpMyAdmin, bỏ `--profile tools`. Dữ liệu MySQL, dashboard và log được lưu trong Docker volumes. `docker compose down -v` xóa các volumes đó, gồm toàn bộ dữ liệu; chỉ chạy khi muốn tạo lại hệ thống từ đầu.
+`docker compose down` dừng và gỡ container nhưng giữ dữ liệu trong volumes. Không dùng `docker compose down -v` trừ khi muốn xóa cả dữ liệu MySQL, log, ảnh tải lên, dashboard và chỉ số đã lưu.
 
-## 4. Bố cục mã nguồn
+Nếu Docker báo không kết nối được daemon, hãy mở Docker Desktop và chờ Docker Engine chạy rồi thử lại. Nếu một dịch vụ không khởi động, xem `docker compose ps` và log của dịch vụ đó trước khi thay đổi cấu hình.
+
+## Bố cục mã nguồn
 
 ```text
 app/                         Kết nối MySQL, migration, session, CSRF và xử lý route
-public/                      Front controller và tài nguyên CSS/JavaScript
-views/                       Giao diện website và trang quản trị
+public/                      Front controller, CSS, JavaScript và tài nguyên giao diện
+views/                       Giao diện portfolio và trang quản trị
 infra/php/                   Dockerfile, PHP và PHP-FPM config
-infra/mysql/                 Schema, init user exporter và cấu hình log MySQL
+infra/mysql/                 Schema, tài khoản exporter và cấu hình log MySQL
 infra/nginx/                 Reverse proxy, HTTPS và security headers
 infra/observability/         Prometheus, Grafana, Loki và Promtail
 scripts/                     Script tạo mật khẩu cục bộ
-compose.yaml                 Khai báo dịch vụ, networks, volumes và secrets
+compose.yaml                 Dịch vụ, mạng, volumes và secrets của Docker Compose
 ```
-
-PHP dùng PDO prepared statements, escape dữ liệu đầu ra, session cookie HttpOnly/SameSite, đổi session ID sau đăng nhập, token CSRF, giới hạn thử đăng nhập và kiểm tra đường dẫn URL. Migration thêm các trường ảnh đại diện/học vấn và trạng thái ảnh đã tách nền, tạo bảng các mục nổi bật của phần Giới thiệu và sửa các chuỗi tiếng Việt bị lỗi mã hóa trong dữ liệu đã khởi tạo; migration chạy tự động khi container ứng dụng khởi động. Trong trang quản trị, các mục nổi bật có thể được thêm, sửa và xóa. Ảnh tải lên được lưu trong Docker volume dùng chung giữa PHP và Nginx. Tài khoản `portfolio_app` chỉ có quyền trên database `portfolio`; exporter MySQL có user riêng với quyền đọc số liệu. Mạng database và ứng dụng được đánh dấu `internal`; Nginx có network bridge riêng để phục vụ cổng HTTPS chỉ trên loopback, còn Grafana, Prometheus và phpMyAdmin cũng chỉ công bố cổng trên loopback.
-
-`cAdvisor` cần đọc Docker socket để liệt kê và lấy số liệu container. Socket được gắn `:ro`, dịch vụ không công bố cổng ra máy host và không có capability bổ sung; Docker socket vẫn là giao diện có quyền cao, nên chỉ bật stack này trên máy phát triển đáng tin cậy. Nginx, PHP, MySQL và các dịch vụ quan sát còn lại dùng `no-new-privileges`, filesystem read-only khi phù hợp và capability đã loại bỏ.
-
-## 5. Tình trạng Promtail
-
-Đề tài yêu cầu cụ thể Loki + Promtail, vì vậy Compose có Promtail và cấu hình LogQL để đáp ứng tiêu chí thực hành. Theo [tài liệu Grafana](https://grafana.com/docs/loki/latest/send-data/promtail/), Promtail đã EOL từ ngày 02/03/2026 và không còn nhận cập nhật; Grafana hướng người dùng sang [Grafana Alloy](https://grafana.com/docs/alloy/latest/set-up/migrate/). Không dùng Promtail cho hệ thống công khai mới. Có thể chuyển các scrape job trong `infra/observability/promtail.yml` sang Alloy sau khi hoàn thành phần trình diễn theo yêu cầu môn học.
-
-## 6. Đưa mã nguồn lên GitHub
-
-Repository là dự án được Git theo dõi: source code, cấu hình và lịch sử commit. Thư mục `portfolio-system` trên máy là repository cục bộ; GitHub lưu một bản trực tuyến để nộp bài và chia sẻ. Thư mục này đã có 3 commit cục bộ với nội dung riêng cho ứng dụng/database, Nginx/Compose và logging/giám sát.
-
-Tạo tài khoản GitHub theo hướng dẫn môn học bằng mã sinh viên `DTC245200102`, tạo repository tên `portfolio-system`, rồi tại PowerShell trong thư mục project trỏ repo cục bộ tới GitHub. Không đưa thư mục `secrets/` lên Git.
-
-```powershell
-git log --oneline -3
-git remote add origin https://github.com/DTC245200102/portfolio-system.git
-git push -u origin main
-```
-
-Nếu GitHub không cho đăng ký đúng tên tài khoản này hoặc bạn đã có username khác, thay phần `DTC245200102` bằng username thực tế. Nếu repository đã có remote tên `origin`, dùng `git remote set-url origin <URL>` thay cho lệnh `git remote add`. Xem `git status` trước mỗi lần push để chắc chắn không có file mật khẩu nào được theo dõi.
